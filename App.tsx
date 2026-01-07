@@ -1,45 +1,55 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import React from 'react';
+import { useEffect } from 'react';
 import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+  requestNotificationPermission,
+  setupNotificationChannel,
+} from './src/utils/notifications';
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+//import { StyleSheet } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { RoutineProvider } from './src/context/RoutineContext';
+import HomeScreen from './src/screens/HomeScreen';
+import TasksScreen from './src/screens/TasksScreen';
+import RoutinesScreen from './src/screens/RoutinesScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
+import CreateRoutineScreen from './src/screens/CreateRoutineScreen';
+
+const Stack = createNativeStackNavigator();
+
+export default function App() {
+  useEffect(() => {
+    (async () => {
+      const allowed = await requestNotificationPermission();
+      if (allowed) {
+        await setupNotificationChannel();
+      }
+    })();
+  }, []);
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <RoutineProvider>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Tasks" component={TasksScreen} />
+            <Stack.Screen name="Routines" component={RoutinesScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen
+              name="CreateRoutine"
+              component={CreateRoutineScreen}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </RoutineProvider>
+    </GestureHandlerRootView>
   );
 }
 
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
-export default App;
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//   },
+// });
